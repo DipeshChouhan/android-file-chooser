@@ -1,2 +1,3 @@
 rootProject.name='Android File Selector'
 include ':app'
+include ':file_chooser'

@@ -1,4 +1,4 @@
-package com.miniblocks.androidfileselector;
+package com.miniblocks.androidfileselector.file_selector;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,11 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.miniblocks.androidfileselector.R;
+
 import java.io.File;
 import java.util.ArrayList;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private ArrayList<File> files = new ArrayList<>();
+    private ArrayList<SimpleFile> files = new ArrayList<>();
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -25,14 +27,36 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        File file  = files.get(position);
+        final SimpleFile file  = files.get(position);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                itemClicked(file);
+            }
+        });
         if(file.isDirectory()){
-            System.out.println(file.getName());
             holder.fileImage.setImageResource(R.drawable.ic_folder_black_24dp);
         }else{
             holder.fileImage.setImageResource(R.drawable.ic_insert_drive_file_black_24dp);
         }
-        holder.fileName.setText(file.getName());
+        holder.fileName.setText(file.name());
+
+    }
+
+    private void itemClicked(SimpleFile file){
+        if(file.isDirectory()){
+            setItems(listAllFiles(file.path()));
+        }
+    }
+
+    private ArrayList<SimpleFile> listAllFiles(String directoryPath){
+        File[] files = new File(directoryPath).listFiles();
+        ArrayList<SimpleFile> filesList = new ArrayList<>();
+        for(File file : files){
+            filesList.add(new SimpleFile(file));
+        }
+
+        return filesList;
     }
 
     @Override
@@ -50,7 +74,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    public void setItems(ArrayList<File> files){
+    public void setItems(ArrayList<SimpleFile> files){
         this.files = files;
         notifyDataSetChanged();
     }

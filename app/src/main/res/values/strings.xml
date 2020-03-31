@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Android File Selector</string>
     <string name="image">image</string>
+    <string name="open_file">Open File</string>
 </resources>

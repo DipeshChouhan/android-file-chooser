@@ -1,16 +1,13 @@
-package com.miniblocks.androidfileselector;
+package com.miniblocks.androidfileselector.file_selector;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class AskPermission {
 
