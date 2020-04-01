@@ -18,8 +18,4 @@ public class FileUtil {
         return System.getenv("SECONDARY_STORAGE");
     }
 
-    static interface FileSelectorCallback {
-        void callback();
-
-    }
 }

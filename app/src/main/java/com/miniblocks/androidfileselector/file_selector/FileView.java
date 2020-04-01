@@ -18,7 +18,10 @@ import com.miniblocks.androidfileselector.R;
  * Fragment class. It shows list of folders and files.
  */
 class FileView extends Fragment {
-    Toolbar toolbar;
+    SelectorCallbacks selectorCallbacks;
+    public FileView(SelectorCallbacks callbacks){
+        selectorCallbacks = callbacks;
+    }
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -33,7 +36,6 @@ class FileView extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.recycler_view, container, false);
-        toolbar = view.findViewById(R.id.toolbar_id);
 
 
         return view;

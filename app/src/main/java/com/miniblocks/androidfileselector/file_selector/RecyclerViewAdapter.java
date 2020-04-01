@@ -7,8 +7,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-
-    public RecyclerViewAdapter(){
+    private SelectorCallbacks mCallbacks;
+    public RecyclerViewAdapter(SelectorCallbacks callbacks){
 
     }
 

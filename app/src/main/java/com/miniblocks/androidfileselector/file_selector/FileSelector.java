@@ -1,5 +1,6 @@
 package com.miniblocks.androidfileselector.file_selector;
 
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 /**@author Dipesh Chouhan
@@ -18,6 +19,7 @@ public class FileSelector extends SelectorCallbacks {
     private String mIndicatorFilesText;
     private String mIndicatorEmptyFolderText;
     private String mDefaultInternalStorageName;
+
     /**
      * Initializing all our variables with values provided by FileBuilder object
      * @param fileBuilder - FileBuilder object
@@ -36,6 +38,8 @@ public class FileSelector extends SelectorCallbacks {
         mIndicatorEmptyFolderText = fileBuilder.indicatorEmptyFolderText;
         mDefaultInternalStorageName = fileBuilder.defaultInternalStorageName;
     }
+
+
 
 
     /**
@@ -169,6 +173,33 @@ public class FileSelector extends SelectorCallbacks {
      */
     public void open(){
         // opens the fragment
+    }
+
+    /**
+     * Open the fragment and add it to backStack also.
+     * @param fragment -  to open.
+     */
+    private void openFragment(Fragment fragment){
+        mFragmentManager.beginTransaction().addToBackStack(fragment.getTag()).add(mContainerId,
+                fragment).commit();
+    }
+
+    /**
+     *
+     * @param path -of selected folder
+     */
+    @Override
+    protected void selectedFolderPath(String path) {
+
+    }
+
+    /**
+     *
+     * @param paths - of selected files.
+     */
+    @Override
+    protected void selectedFilesPath(String... paths) {
+
     }
 
 
