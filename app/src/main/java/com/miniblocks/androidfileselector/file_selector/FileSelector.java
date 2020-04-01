@@ -2,71 +2,80 @@ package com.miniblocks.androidfileselector.file_selector;
 
 import androidx.fragment.app.FragmentManager;
 
-import java.io.File;
-import java.util.ArrayList;
-
 /**@author Dipesh Chouhan
  * Implements Builder pattern for developer convenience.
  */
-public class FileSelector {
+public class FileSelector extends SelectorCallbacks {
+    private FragmentManager mFragmentManager;
+    private int mContainerId;
 
     /**
-     * A builder. To create instance of it you must call FileSelector overloaded with(...param)
-     * methods.
+     * Initializing all our variables with values provided by FileBuilder object
+     * @param fileBuilder - FileBuilder object
+     */
+    private FileSelector(FileBuilder fileBuilder){
+        mFragmentManager = fileBuilder.fragmentManager;
+        mContainerId = fileBuilder.containerId;
+    }
+
+
+    /**
+     * A simple builder class to build
      */
     public static class FileBuilder{
-
-        private FragmentManager mFragmentManager;
-        private int mContainer;
-        private String[] filterExtensions;
-        private String filterExtensionName;
-        /**
-         * @param fragmentManager - instance of FragmentManager.
-         * @param container - id of fragment to replace ex:- R.id.fragmentContainer.
-         */
-        private FileBuilder(FragmentManager fragmentManager, int container){
-
-            mFragmentManager = fragmentManager;
-            mContainer = container;
-        }
-
-
-        public FileBuilder applyFilter(String fileTypeName, String ...extensionsToFilter){
-            filterExtensions = extensionsToFilter;
-            filterExtensionName = fileTypeName;
-            return this;
-        }
-
+        private FragmentManager fragmentManager;
+        private int containerId;
 
         /**
-         * Opens the fragment containing list of files and folders.
-         * Add the FileView fragment to BackStack also.
+         *
+         * @param fragmentManager - FragmentManager object which provided by developer via parent
+         *                       class with method.
+         * @param containerId - fragment id with which to replace the FileView fragment.
          */
-        public void open(){
-            mFragmentManager.beginTransaction().add(mContainer, new FileView()).addToBackStack(
-                    "fileView").commit();
+        private FileBuilder(FragmentManager fragmentManager, int containerId){
+            this.fragmentManager = fragmentManager;
+            this.containerId = containerId;
+        }
+
+        /**
+         *
+         * @return {FileSelector} - A FileSelector object argument "this" passed.
+         */
+        public FileSelector build(){
+            return new FileSelector(this);
         }
     }
 
     /**
      *
-     * @param fragmentManager - instance of FragmentManager class ex:- inside activity
-     *                        (getSupportFragmentManager()).
-     * @return {FileBuilder} instance of the inner static class.
+     * @param fragmentManager - FragmentManager passed by developer ex:-
+     *                        getSupportFragmentManager().
+     * @param containerId - fragment or container id with which to replace FileView fragment ex:-
+     *                   R.id.containerID.
+     * @return {FileBuilder} - object from which "this" object is build
      */
+    public static FileBuilder with(FragmentManager fragmentManager, int containerId){
+        return new FileBuilder(fragmentManager, containerId);
+    }
+
+    /**
+     *In this method a default container id is passed as argument "android.R.id.content".
+     * @param fragmentManager - FragmentManager passed by developer ex:-
+     *                        getSupportFragmentManager().
+     * @return {FileBuilder} - object from which "this" object is build
+     */
+
     public static FileBuilder with(FragmentManager fragmentManager){
         return new FileBuilder(fragmentManager, android.R.id.content);
     }
 
-    /**
-     *
-     * @param fragmentManager - instance of FragmentManager class.
-     * @param container - id of fragment or container which replaced with FileView fragment
-     * @return {FileBuilder} instance of the inner Static class.
-     */
 
-    public static FileBuilder with(FragmentManager fragmentManager, int container){
-        return new FileBuilder(fragmentManager, container);
+    /**
+     * Opens the fragment with list of folders and files with given settings.
+     */
+    public void open(){
+        // opens the fragment
     }
+
 
 }

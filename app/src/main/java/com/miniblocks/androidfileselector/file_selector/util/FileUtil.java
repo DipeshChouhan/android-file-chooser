@@ -1,4 +1,4 @@
-package com.miniblocks.androidfileselector.file_selector;
+package com.miniblocks.androidfileselector.file_selector.util;
 
 import android.os.Environment;
 
@@ -18,4 +18,8 @@ public class FileUtil {
         return System.getenv("SECONDARY_STORAGE");
     }
 
+    static interface FileSelectorCallback {
+        void callback();
+
+    }
 }

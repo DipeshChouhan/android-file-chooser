@@ -1,4 +1,4 @@
-package com.miniblocks.androidfileselector.file_selector;
+package com.miniblocks.androidfileselector.file_selector.util;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;

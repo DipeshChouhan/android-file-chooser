@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.miniblocks.androidfileselector.file_selector.FileSelector;
 
+import java.nio.file.FileSystemException;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void openFileButtonClick(View view){
         // open File Button Clicked
-        FileSelector.with(getSupportFragmentManager()).open();
+        FileSelector.with(getSupportFragmentManager()).build().open();
     }
 }
 
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
+//
 //    public void getFiles(File file){
 //
 //        if(!file.isDirectory()){
