@@ -7,7 +7,7 @@ class SimpleFile {
 
     public String path;
     public String name;
-    public String indicatorText;
+    public String indicatorText = "";
     public boolean isDirectory;
 
     /**
@@ -22,5 +22,9 @@ class SimpleFile {
         this.name = name;
         this.indicatorText = indicatorText;
         this.isDirectory = isDirectory;
+    }
+
+    public SimpleFile(){
+
     }
 }

@@ -6,8 +6,11 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
     private SelectorCallbacks mCallbacks;
+    private ArrayList<SimpleFile> simpleFiles = new ArrayList<>();
     public RecyclerViewAdapter(SelectorCallbacks callbacks){
 
     }
@@ -27,7 +30,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-        return 0;
+        return simpleFiles.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
@@ -36,6 +39,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             super(itemView);
 
         }
+    }
+
+    public void setSimpleFiles(ArrayList<SimpleFile> files){
+        simpleFiles = files;
+        notifyDataSetChanged();
     }
 
 }

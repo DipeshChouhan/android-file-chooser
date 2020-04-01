@@ -3,6 +3,12 @@ package com.miniblocks.androidfileselector.file_selector;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.miniblocks.androidfileselector.file_selector.util.FileUtil;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+
 /**@author Dipesh Chouhan
  * Implements Builder pattern for developer convenience.
  */
@@ -19,7 +25,7 @@ public class FileSelector extends SelectorCallbacks {
     private String mIndicatorFilesText;
     private String mIndicatorEmptyFolderText;
     private String mDefaultInternalStorageName;
-
+    public static final String NO_ERROR = "";
     /**
      * Initializing all our variables with values provided by FileBuilder object
      * @param fileBuilder - FileBuilder object
@@ -172,7 +178,9 @@ public class FileSelector extends SelectorCallbacks {
      * Opens the fragment with list of folders and files with given settings.
      */
     public void open(){
-        // opens the fragment
+        if(mFolderToOpenName == null){
+            defaultStart();
+        }
     }
 
     /**
@@ -182,6 +190,26 @@ public class FileSelector extends SelectorCallbacks {
     private void openFragment(Fragment fragment){
         mFragmentManager.beginTransaction().addToBackStack(fragment.getTag()).add(mContainerId,
                 fragment).commit();
+    }
+
+    /**
+     * A default start when folder to open is not given.
+     */
+    private void defaultStart(){
+        ArrayList<SimpleFile> files = new ArrayList<>();
+        FileView fileView = new FileView(this);
+        fileView.setToolbarTitleText(mInitialTitle);
+        String internalStoragePath = FileUtil.getInternalDirectoryPath();
+        String sdCardStoragePath = FileUtil.getSDcardDirectoryPath();
+        files.add(new SimpleFile(internalStoragePath, mDefaultInternalStorageName,
+                "", true));
+        if(sdCardStoragePath != null){
+            File sdCardStorageFile = new File(sdCardStoragePath);
+            files.add(new SimpleFile(sdCardStoragePath, sdCardStorageFile.getName(),
+                    "", true));
+        }
+        fileView.getAdapter().setSimpleFiles(files);
+        openFragment(fileView);
     }
 
     /**
@@ -202,5 +230,83 @@ public class FileSelector extends SelectorCallbacks {
 
     }
 
+    /**
+     * It gives list of all filtered files with given settings.
+     * @param path - of folder which is clicked
+     * @return {ArrayList<SimpleFile} - which shows to user in next fragment.
+     */
+    private ArrayList<SimpleFile> getSimpleFilesList(String path){
+        ArrayList<SimpleFile> filesList = new ArrayList<>();    // array list to return.
+        File[] files = new File(path).listFiles(fileFilter);    // a filtered files array.
+        // check for files. If null return a null list.
+        if(files == null){
+            return null;
+        }
+        // traversing each file in files array.
+        for(File file: files){
+            SimpleFile simpleFile = new SimpleFile();
+            boolean isDirectory = file.isDirectory();
+            // if file is directory then only we do stuff for folder indicators
+            if(isDirectory){
+                if(isShowFolderIndicators){
+                    String folderIndicatorText = mIndicatorEmptyFolderText;
+                    int subFolderCount = 0;
+                    int filesCount = 0;
+                    // now traversing each file in this directory.
+                    for(File inFile: file.listFiles(fileFilter)){
+                        // if inFile is directory then we increment subFolderCount.
+                        if(inFile.isDirectory()) subFolderCount++;
+                        // else we increment filesCount.
+                        else{
+                            filesCount++;
+                        }
+                    }
+
+                    /*
+                     * Here all just constructing folder indicator text.
+                     */
+                    boolean areSubFolders = false;
+
+                    if(subFolderCount > 0) {
+                        folderIndicatorText = subFolderCount + " " + mIndicatorSubFoldersText;
+                        areSubFolders = true;
+                    }
+                    if(filesCount > 0){
+                        String filesIndicatorText = filesCount+" "+mIndicatorFilesText;
+                        folderIndicatorText = areSubFolders ?
+                                folderIndicatorText + ", " + filesIndicatorText: filesIndicatorText;
+                    }
+                    simpleFile.indicatorText = folderIndicatorText;
+
+                }
+            }
+            // initializing simpleFile.
+            simpleFile.isDirectory = isDirectory;
+            simpleFile.path = file.getAbsolutePath();
+            simpleFile.name = file.getName();
+            // adding simpleFile to our filesList
+            filesList.add(simpleFile);
+        }
+
+        return filesList;
+    }
+
+    /**
+     * A simple file filter which filters all files ending with given fileExtensions but exclude
+     * a directory. If developer have not provide extensions then it return true.
+     */
+    private FileFilter fileFilter = new FileFilter() {
+        @Override
+        public boolean accept(File pathname) {
+            if(pathname.isDirectory() || mFileExtensions.length == 0){
+                return true;
+            }else{
+                for(String extension: mFileExtensions){
+                    if(pathname.getName().endsWith(extension)) return true;
+                }
+            }
+            return false;
+        }
+    };
 
 }
