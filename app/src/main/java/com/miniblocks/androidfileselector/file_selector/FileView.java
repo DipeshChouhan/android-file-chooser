@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.miniblocks.androidfileselector.R;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -24,19 +25,35 @@ import java.util.ArrayList;
  */
 //Todo - fix configuration change bugs.
 public class FileView extends Fragment {
+
+    private String toolbarTitleText;
+    private String toolbarSubTitleText;
     private static SelectorCallbacks selectorCallbacks;
-    private static RecyclerViewAdapter recyclerViewAdapter;
-    private static toolbarTitleText;
-    private static String toolbarSubTitleText;
+    private ArrayList<SimpleFile> simpleFiles;
+    RecyclerViewAdapter adapter;
+    private Toolbar toolbar;
+    private boolean stateSaved = false;
 
-    public FileView(SelectorCallbacks callbacks){
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(savedInstanceState != null){
+            toolbarTitleText = savedInstanceState.getString("titleText");
+            toolbarSubTitleText = savedInstanceState.getString("subTitleText");
+            int size = savedInstanceState.getInt("listSize");
+            simpleFiles = new ArrayList<>();
+            for(int i = 0; i < size; i++){
+                simpleFiles.add((SimpleFile)savedInstanceState.getParcelable(String.valueOf(i)));
+            }
 
-        selectorCallbacks = callbacks;
-        recyclerViewAdapter = new RecyclerViewAdapter(callbacks);
+            System.out.println("onActivityCraeted");
+            for(SimpleFile file: simpleFiles){
+                System.out.println(file.name);
+            }
+            stateSaved = true;
+        }
     }
-    public FileView(){
 
-    }
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -48,18 +65,34 @@ public class FileView extends Fragment {
 
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("titleText", toolbarTitleText);
+        outState.putString("subTitleText", toolbarSubTitleText);
+        System.out.println("on Save instance state " + simpleFiles);
+        outState.putInt("listSize", simpleFiles.size());
+        for(int i =0; i<simpleFiles.size(); i++){
+            SimpleFile simpleFile = simpleFiles.get(i);
+            outState.putParcelable(String.valueOf(i), new SimpleFile(
+                    simpleFile.path, simpleFile.name, simpleFile.indicatorText, simpleFile.isDirectory
+            ));
+        }
+
+
+        System.out.println(stateSaved+" on save");
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        System.out.println("create View");
         View view = inflater.inflate(R.layout.recycler_view, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_id);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(recyclerViewAdapter);
-        Toolbar toolbar = view.findViewById(R.id.toolbar_id);
-        toolbar.setTitle(toolbarTitleText);
-        if(toolbarSubTitleText != null){
-            toolbar.setSubtitle(toolbarSubTitleText);
-        }
+
+        toolbar = view.findViewById(R.id.toolbar_id);
+        System.out.println();
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -70,12 +103,15 @@ public class FileView extends Fragment {
                 onBackButtonClicked();
             }
         });
-
+        adapter = new RecyclerViewAdapter(selectorCallbacks, simpleFiles);
+        recyclerView.setAdapter(adapter);
+        toolbar.setTitle(toolbarTitleText);
+        if(toolbarSubTitleText != null) toolbar.setSubtitle(toolbarSubTitleText);
         return view;
     }
 
     private void onBackButtonClicked(){
-        getFragmentManager().beginTransaction().remove(this).commit();
+        getActivity().getSupportFragmentManager().popBackStack();
     }
 
 //    /**
@@ -91,7 +127,7 @@ public class FileView extends Fragment {
      * @param titleText - for toolbar title.
      */
     public void setToolbarTitleText(String titleText){
-        toolbarTitleText = titleText;
+       toolbarTitleText = titleText;
     }
 
     /**
@@ -99,7 +135,9 @@ public class FileView extends Fragment {
      * @param subTitleText - for toolbar subtitle.
      */
     public void setToolbarSubTitleText(String subTitleText){
+
         toolbarSubTitleText = subTitleText;
+
     }
 
     @Override
@@ -108,7 +146,23 @@ public class FileView extends Fragment {
 
     }
 
-    public RecyclerViewAdapter getAdapter(){
-        return recyclerViewAdapter;
+    public void config(SelectorCallbacks callbacks, ArrayList<SimpleFile> listOfFiles){
+        selectorCallbacks = callbacks;
+        simpleFiles = listOfFiles;
     }
+
+    @Override
+    public void onResume() {
+
+        super.onResume();
+        System.out.println(stateSaved+ " onResume");
+        if(stateSaved){
+            adapter.setSimpleFiles(simpleFiles);
+            toolbar.setTitle(toolbarTitleText);
+            if(toolbarSubTitleText != null){
+                toolbar.setSubtitle(toolbarSubTitleText);
+            }
+        }
+    }
+
 }

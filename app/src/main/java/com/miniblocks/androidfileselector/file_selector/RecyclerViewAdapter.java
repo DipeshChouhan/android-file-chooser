@@ -16,9 +16,16 @@ import java.util.ArrayList;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
     private SelectorCallbacks mCallbacks;
-    private ArrayList<SimpleFile> simpleFiles = new ArrayList<>();
-    public RecyclerViewAdapter(SelectorCallbacks callbacks){
+    private ArrayList<SimpleFile> simpleFiles;
+    public RecyclerViewAdapter(SelectorCallbacks callbacks, ArrayList<SimpleFile> listOfFiles){
         mCallbacks = callbacks;
+        if(listOfFiles == null){
+            simpleFiles = new ArrayList<>();
+        }else{
+            simpleFiles = listOfFiles;
+        }
+
+        System.out.println(simpleFiles);
     }
 
     @NonNull

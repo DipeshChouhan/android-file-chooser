@@ -11,7 +11,7 @@ import java.nio.file.FileSystemException;
 
 
 public class MainActivity extends AppCompatActivity {
-
+FileSelector selector;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,11 +21,19 @@ public class MainActivity extends AppCompatActivity {
 
     public void openFileButtonClick(View view){
         // open File Button Clicked
-        FileSelector.with(getSupportFragmentManager())
-        .setFileType("image", ".png", "jpg", ".jpeg")
-                .showFolderIndicators(false)
-        .build().open();
+        selector = FileSelector.with(getSupportFragmentManager())
+                .setFileType("image", ".png", ".jpg", ".jpeg").build();
+        selector.open();
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("onResume activity");
+    }
+
+
 }
 
 

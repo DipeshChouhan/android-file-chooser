@@ -1,14 +1,24 @@
 package com.miniblocks.androidfileselector.file_selector;
 
-import androidx.core.content.ContextCompat;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.miniblocks.androidfileselector.R;
 import com.miniblocks.androidfileselector.file_selector.util.FileUtil;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
 
 /**@author Dipesh Chouhan
@@ -28,8 +38,9 @@ public class FileSelector extends SelectorCallbacks {
     private String mIndicatorEmptyFolderText;
     private String mDefaultInternalStorageName;
     public static final String NO_ERROR = "";
+
     private boolean isShowHiddenFiles;
-    private ArrayList<SimpleFile> listOfSimpleFiles = new ArrayList<>();
+
     /**
      * Initializing all our variables with values provided by FileBuilder object
      * @param fileBuilder - FileBuilder object
@@ -233,8 +244,11 @@ public class FileSelector extends SelectorCallbacks {
      * @param fragment -  to open.
      */
     private void openFragment(Fragment fragment){
-        mFragmentManager.beginTransaction().addToBackStack(fragment.getTag()).add(mContainerId,
-                fragment).commit();
+            mFragmentManager.beginTransaction().
+                    replace(mContainerId, fragment).addToBackStack(fragment.getTag())
+            .commitAllowingStateLoss();
+
+
     }
 
     /**
@@ -242,8 +256,7 @@ public class FileSelector extends SelectorCallbacks {
      */
     private void defaultStart(){
         ArrayList<SimpleFile> files = new ArrayList<>();
-        FileView fileView = new FileView(this);
-        fileView.setToolbarTitleText(mInitialTitle);
+        FileView fileView = new FileView();
         String internalStoragePath = FileUtil.getInternalDirectoryPath();
         String sdCardStoragePath = FileUtil.getSDcardDirectoryPath();
         files.add(new SimpleFile(internalStoragePath, mDefaultInternalStorageName,
@@ -253,8 +266,11 @@ public class FileSelector extends SelectorCallbacks {
             files.add(new SimpleFile(sdCardStoragePath, sdCardStorageFile.getName(),
                     "", true));
         }
-        fileView.getAdapter().setSimpleFiles(files);
+        fileView.config(this, files);
+        fileView.setToolbarTitleText(mInitialTitle);
         openFragment(fileView);
+        System.out.println(files);
+        System.out.println("defaultStart()");
 
     }
 
@@ -264,12 +280,15 @@ public class FileSelector extends SelectorCallbacks {
      */
     @Override
     protected void selectedFolderPath(String path, String name) {
-        listOfSimpleFiles = getSimpleFilesList(path);
-        FileView fileView = new FileView(this);
+        System.out.println("Selected folder path " + path + "  "+name);
+        ArrayList<SimpleFile> files = getSimpleFilesList(path);
+        FileView fileView = new FileView();
+        fileView.config(this, files);
         fileView.setToolbarTitleText(name);
         fileView.setToolbarSubTitleText(path);
-        fileView.getAdapter().setSimpleFiles(listOfSimpleFiles);
+
         openFragment(fileView);
+
     }
 
     /**
@@ -398,5 +417,71 @@ public class FileSelector extends SelectorCallbacks {
         }
         return null;
     }
+
+//    public static class FileView1 extends Fragment{
+//        private SelectorCallbacks mCallbacks;
+//        private String toolbarTitleText;
+//        private String toolbarSubTitleText;
+//
+//        @Nullable
+//        @Override
+//        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+//            View view = inflater.inflate(R.layout.recycler_view, container, false);
+//            RecyclerView recyclerView = view.findViewById(R.id.recycler_view_id);
+//            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//            RecyclerViewAdapter adapter = new RecyclerViewAdapter(mCallbacks,
+//                    listOfSimpleFiles);
+//            recyclerView.setAdapter(adapter);
+//            Toolbar toolbar = view.findViewById(R.id.toolbar_id);
+//
+//            ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+//            ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+//            ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//            toolbar.setTitle(toolbarTitleText);
+//            if(toolbarSubTitleText != null) toolbar.setSubtitle(toolbarSubTitleText);
+//            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    onBackButtonClicked();
+//                }
+//            });
+//            return view;
+//        }
+//
+//        public void config(SelectorCallbacks callbacks){
+//            mCallbacks = callbacks;
+//        }
+//
+//        private void onBackButtonClicked(){
+//            getFragmentManager().beginTransaction().remove(this).commit();
+//        }
+//
+//        /**
+//         *
+//         * @param titleText - for toolbar title.
+//         */
+//        public void setToolbarTitleText(String titleText){
+//            toolbarTitleText = titleText;
+//        }
+//
+//        /**
+//         *
+//         * @param subTitleText - for toolbar subtitle.
+//         */
+//        public void setToolbarSubTitleText(String subTitleText){
+//
+//            toolbarSubTitleText = subTitleText;
+//
+//        }
+
+
+
+//
+//    }
+
+    public void onResumedFragment(FragmentManager fragmentManager){
+        mFragmentManager = fragmentManager;
+    }
+
 
 }
