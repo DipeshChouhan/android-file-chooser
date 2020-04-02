@@ -21,7 +21,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void openFileButtonClick(View view){
         // open File Button Clicked
-        FileSelector.with(getSupportFragmentManager()).build().open();
+        FileSelector.with(getSupportFragmentManager())
+        .setFileType("image", ".png", "jpg", ".jpeg")
+                .showFolderIndicators(false)
+        .build().open();
     }
 }
 

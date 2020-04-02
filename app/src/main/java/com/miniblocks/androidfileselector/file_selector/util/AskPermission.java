@@ -24,6 +24,8 @@ public class AskPermission {
         }
     }
 
+
+
     public void request(){
         String[] permissions = Arrays.copyOf(permissionsToRequest.toArray(),
                 permissionsToRequest.size(), String[].class);

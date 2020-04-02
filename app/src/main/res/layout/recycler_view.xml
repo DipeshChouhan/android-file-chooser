@@ -12,7 +12,7 @@
         android:background="#222222"
         app:title="File Chooser"
         app:titleTextColor="#ffffff"
-
+        app:subtitleTextColor="#999999"
         android:theme="@style/ToolbarTheme"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_id"

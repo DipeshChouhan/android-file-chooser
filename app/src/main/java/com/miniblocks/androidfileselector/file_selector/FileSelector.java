@@ -1,5 +1,6 @@
 package com.miniblocks.androidfileselector.file_selector;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -7,6 +8,7 @@ import com.miniblocks.androidfileselector.file_selector.util.FileUtil;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
 
 /**@author Dipesh Chouhan
@@ -26,6 +28,8 @@ public class FileSelector extends SelectorCallbacks {
     private String mIndicatorEmptyFolderText;
     private String mDefaultInternalStorageName;
     public static final String NO_ERROR = "";
+    private boolean isShowHiddenFiles;
+    private ArrayList<SimpleFile> listOfSimpleFiles = new ArrayList<>();
     /**
      * Initializing all our variables with values provided by FileBuilder object
      * @param fileBuilder - FileBuilder object
@@ -43,6 +47,7 @@ public class FileSelector extends SelectorCallbacks {
         mIndicatorFilesText = fileBuilder.indicatorFilesText;
         mIndicatorEmptyFolderText = fileBuilder.indicatorEmptyFolderText;
         mDefaultInternalStorageName = fileBuilder.defaultInternalStorageName;
+        isShowHiddenFiles = fileBuilder.isShowHiddenFiles;
     }
 
 
@@ -56,7 +61,7 @@ public class FileSelector extends SelectorCallbacks {
         private int containerId;
         private FileCallback fileCallback;
         private String fileTypeName;
-        private String[] fileExtensions;
+        private String[] fileExtensions = new String[0];
         private String folderToOpenName;
         private String initialTitle = "Directories";
         private boolean isShowFolderIndicators = true;
@@ -64,6 +69,7 @@ public class FileSelector extends SelectorCallbacks {
         private String indicatorFilesText = "files";
         private String indicatorEmptyFolderText = "Directory Empty";
         private String defaultInternalStorageName = "Internal Storage";
+        private boolean isShowHiddenFiles = false;
         /**
          *
          * @param fragmentManager - FragmentManager object which provided by developer via parent
@@ -80,8 +86,9 @@ public class FileSelector extends SelectorCallbacks {
          *
          * @param callback - it called when files get selected.
          */
-        public void addCallback(FileCallback callback){
+        public FileBuilder addCallback(FileCallback callback){
             fileCallback = callback;
+            return this;
         }
 
         /**
@@ -89,9 +96,10 @@ public class FileSelector extends SelectorCallbacks {
          * @param fileTypeName - name of your files type ex:- "media" files, "image" files etc.
          * @param fileExtensions - to filter files ex:- ".png", ".jpg", ".mp3", ".mp4", ".txt" etc.
          */
-        public void setFileType(String fileTypeName, String ...fileExtensions){
+        public FileBuilder setFileType(String fileTypeName, String ...fileExtensions){
             this.fileTypeName = fileTypeName;
             this.fileExtensions = fileExtensions;
+            return this;
         }
 
         /**
@@ -103,34 +111,38 @@ public class FileSelector extends SelectorCallbacks {
          *                      "n(number of sub folders) subfolders.
          * @param emptyFolderText - indicating the folder is empty. Default is "Directory is empty".
          */
-        public void setFolderIndicatorText(String filesText, String subFolderText,
+        public FileBuilder setFolderIndicatorText(String filesText, String subFolderText,
                                            String emptyFolderText){
             indicatorSubFoldersText = subFolderText;
             indicatorEmptyFolderText = emptyFolderText;
             indicatorFilesText = filesText;
+            return this;
         }
         /**
          *
          * @param title - is displayed as toolbar title when first open with default settings.
          */
-        public void setInitialTitle(String title){
+        public FileBuilder setInitialTitle(String title){
             initialTitle = title;
+            return this;
         }
 
         /**
          * Sets the internal storage name when first open ex:- Internal Storage
          * @param name - of internal storage you want to display when first open.
          */
-        public void setInternalStorageName(String name){
+        public FileBuilder setInternalStorageName(String name){
             defaultInternalStorageName = name;
+            return this;
         }
 
         /**
          *
          * @param folderName - name of the folder to open. ex:- 'Downloads' etc.
          */
-        public void folderToOpen(String folderName){
+        public FileBuilder folderToOpen(String folderName){
             folderToOpenName = folderName;
+            return this;
         }
 
         /**
@@ -138,8 +150,18 @@ public class FileSelector extends SelectorCallbacks {
          * @param showOrNot - True for show indicators or False for not show indicators. Default
          *                  is true.
          */
-        public void showFolderIndicators(boolean showOrNot){
+        public FileBuilder showFolderIndicators(boolean showOrNot){
             isShowFolderIndicators = showOrNot;
+            return this;
+        }
+
+        /**
+         *
+         * call if you want to show hidden directories also.
+         */
+        public FileBuilder showHiddenFiles(){
+            isShowHiddenFiles = true;
+            return this;
         }
         /**
          *
@@ -175,11 +197,34 @@ public class FileSelector extends SelectorCallbacks {
 
 
     /**
+     * Todo - remove both try-catch blocks
      * Opens the fragment with list of folders and files with given settings.
      */
     public void open(){
+
         if(mFolderToOpenName == null){
-            defaultStart();
+            try{
+                defaultStart();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+
+        }else{
+            try{
+                String folderToOpenPath = getFolderPath(new File(FileUtil.getInternalDirectoryPath()));
+                if(folderToOpenPath == null){
+                    if(mFileCallback != null){
+                        mFileCallback.selectedFiles("No such directory with given name found.", "null");
+                    }
+
+                    return;
+                }
+                System.out.println("continue");
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
         }
     }
 
@@ -210,15 +255,21 @@ public class FileSelector extends SelectorCallbacks {
         }
         fileView.getAdapter().setSimpleFiles(files);
         openFragment(fileView);
+
     }
 
     /**
-     *
+     * It simply open new fragment with new list of files and folders in given settings.
      * @param path -of selected folder
      */
     @Override
-    protected void selectedFolderPath(String path) {
-
+    protected void selectedFolderPath(String path, String name) {
+        listOfSimpleFiles = getSimpleFilesList(path);
+        FileView fileView = new FileView(this);
+        fileView.setToolbarTitleText(name);
+        fileView.setToolbarSubTitleText(path);
+        fileView.getAdapter().setSimpleFiles(listOfSimpleFiles);
+        openFragment(fileView);
     }
 
     /**
@@ -227,6 +278,9 @@ public class FileSelector extends SelectorCallbacks {
      */
     @Override
     protected void selectedFilesPath(String... paths) {
+        if(mFileCallback != null){
+            mFileCallback.selectedFiles("", paths);
+        }
 
     }
 
@@ -272,7 +326,9 @@ public class FileSelector extends SelectorCallbacks {
                         areSubFolders = true;
                     }
                     if(filesCount > 0){
-                        String filesIndicatorText = filesCount+" "+mIndicatorFilesText;
+                        String filesIndicatorText =
+                                mFileTypeName == null ? filesCount+" "+mIndicatorFilesText :
+                                        filesCount+" "+mFileTypeName+" "+mIndicatorFilesText;
                         folderIndicatorText = areSubFolders ?
                                 folderIndicatorText + ", " + filesIndicatorText: filesIndicatorText;
                     }
@@ -298,7 +354,10 @@ public class FileSelector extends SelectorCallbacks {
     private FileFilter fileFilter = new FileFilter() {
         @Override
         public boolean accept(File pathname) {
-            if(pathname.isDirectory() || mFileExtensions.length == 0){
+            boolean query = !isShowHiddenFiles ?
+                    pathname.isDirectory() && !pathname.getName().startsWith("."):
+                    pathname.isDirectory();
+            if(query || mFileExtensions.length == 0){
                 return true;
             }else{
                 for(String extension: mFileExtensions){
@@ -308,5 +367,36 @@ public class FileSelector extends SelectorCallbacks {
             return false;
         }
     };
+
+    /**
+     * A simple file filter which filter only directory.
+     */
+    private FileFilter directoryFilter = new FileFilter() {
+        @Override
+        public boolean accept(File pathname) {
+
+            return !isShowHiddenFiles ?
+                    pathname.isDirectory() && !pathname.getName().startsWith("."):
+                    pathname.isDirectory();
+        }
+    };
+
+    /**
+     *
+     * @param file - to start searching for folder path with.
+     * @return - folderPath if it matches else null.
+     */
+    private String getFolderPath(File file){
+        if(file.getName().equals(mFolderToOpenName)){
+            return file.getAbsolutePath();
+        }
+        File[] files = file.listFiles(directoryFilter);
+        if(files != null){
+            for(File f: files){
+                return getFolderPath(f);
+            }
+        }
+        return null;
+    }
 
 }
