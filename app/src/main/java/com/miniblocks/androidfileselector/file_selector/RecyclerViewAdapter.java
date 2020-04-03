@@ -25,7 +25,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             simpleFiles = listOfFiles;
         }
 
-        System.out.println(simpleFiles);
+
     }
 
     @NonNull

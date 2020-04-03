@@ -27,11 +27,7 @@ FileSelector selector;
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        System.out.println("onResume activity");
-    }
+
 
 
 }

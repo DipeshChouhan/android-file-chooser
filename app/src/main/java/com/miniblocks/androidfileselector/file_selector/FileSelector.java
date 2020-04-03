@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 /**@author Dipesh Chouhan
  * Implements Builder pattern for developer convenience.
+ * Note:- The FileSelector does not support configuration changes.
  */
 public class FileSelector extends SelectorCallbacks {
     private FragmentManager mFragmentManager;
@@ -216,9 +217,9 @@ public class FileSelector extends SelectorCallbacks {
                         mFileCallback.selectedFiles("No such directory with given name found.", "null");
                     }
 
-                    return;
+
                 }
-                System.out.println("continue");
+
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -231,10 +232,15 @@ public class FileSelector extends SelectorCallbacks {
      * Open the fragment and add it to backStack also.
      * @param fragment -  to open.
      */
+    private Fragment previousFragment;
     private void openFragment(Fragment fragment){
+        try{
             mFragmentManager.beginTransaction().
-                    replace(mContainerId, fragment).addToBackStack(fragment.getTag())
-            .commitAllowingStateLoss();
+                    add(mContainerId, fragment)
+                    .commitAllowingStateLoss();
+        }catch (Exception e){
+            System.out.println("commit not allow");
+        }
 
 
     }
@@ -257,8 +263,7 @@ public class FileSelector extends SelectorCallbacks {
         fileView.config(this, files);
         fileView.setToolbarTitleText(mInitialTitle);
         openFragment(fileView);
-        System.out.println(files);
-        System.out.println("defaultStart()");
+
 
     }
 
@@ -268,9 +273,10 @@ public class FileSelector extends SelectorCallbacks {
      */
     @Override
     protected void selectedFolderPath(String path, String name) {
-        System.out.println("Selected folder path " + path + "  "+name);
+
         ArrayList<SimpleFile> files = getSimpleFilesList(path);
         FileView fileView = new FileView();
+
         fileView.config(this, files);
         fileView.setToolbarTitleText(name);
         fileView.setToolbarSubTitleText(path);
@@ -407,9 +413,6 @@ public class FileSelector extends SelectorCallbacks {
     }
 
 
-    public void onResumedFragment(FragmentManager fragmentManager){
-        mFragmentManager = fragmentManager;
-    }
 
 
 }
